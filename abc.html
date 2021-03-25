@@ -1,0 +1,98 @@
+<html>
+<head>
+<title>Clickjacking Test Page</title>
+<header>
+    <h1>CLICKJACKING TEST</h1>
+  </header>
+
+<style>
+#overlay
+{
+	padding: 	40px;
+	border: 	8px solid red;
+	width: 		400px;
+	position: 	absolute;
+	background-color: green;
+	font:		bold 14pt verdana;
+	color:		white;
+	left:       540px;
+	top:        400px;
+	display:	none;
+}
+</style>
+<script>
+function moveoverlay()
+{
+	var overlay=document.getElementById("overlay");
+	x=(window.innerWidth - 200)/2;
+	y=(window.innerHeight - overlay.style.height)/2;
+	overlay.style.left = x + "px";
+	overlay.style.top = y + "px";
+	overlay.style.display="block";
+}
+
+function changeframe()
+{
+	var url=document.urlform.inputurl.value;
+	var displayurl=document.getElementById("displayurl");
+	var results=document.getElementById("results");
+	
+	displayurl.textContent="You’ve been Test For clickjacking! The frame URL is: " + url;
+	displayurl.style.display="block";
+	
+	// Create a new frame - delete the old one first
+	var destframe=document.getElementById("destframe");
+	if (destframe)
+	{
+		results.removeChild(destframe);
+	}
+	var newframe=document.createElement("iframe");
+	newframe.setAttribute("src",url);
+	newframe.setAttribute("id","destframe");
+	newframe.style.width="100%";
+	newframe.style.height="90%";
+	newframe.setAttribute("sandbox","allow-scripts allow-forms");
+	results.appendChild(newframe);
+	document.body.setAttribute("onResize","moveoverlay()");
+	moveoverlay();
+}
+
+function toggleformbar()
+{
+	var formbarhidden=(document.getElementById("closer").textContent=="^")?0:1;
+	if (formbarhidden==0)
+	{
+		document.getElementById("theform").style.display="none";
+		document.getElementById("closer").textContent="v";
+	}
+	else
+	{
+		document.getElementById("theform").style.display="block";
+		document.getElementById("closer").textContent="^";
+	}
+}
+	
+</script>
+<script src="abc.js"></script>
+</head>
+<body>
+<div id="formbar" style="">
+	<div id="theform" style="background: #f0f0f0; padding: 0.5em; height: 1.5em; float: left; display: inline">
+		<form name="urlform" onSubmit="changeframe(); return false">
+			<label>Enter Website URL:</label>
+			<input type="input" name="inputurl" />
+			<input type="submit" value="Load" />
+		</form>
+	</div>
+	<div id="closer" style="float: right; display: inline; cursor: pointer" onClick="toggleformbar()">^</div>
+</div>
+
+<br style="clear: both" />
+
+<div id="results">
+	<div id="displayurl" style="display:none"><p>Bit of text for screenshot</p></div><br />
+	<div id="overlay">If Website is Shown in This Frame, then Site is Vulnerable to Clickjacking</div>
+</div>
+</body>
+</html>
+
